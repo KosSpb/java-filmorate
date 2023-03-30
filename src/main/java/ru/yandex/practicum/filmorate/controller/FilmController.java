@@ -18,12 +18,12 @@ public class FilmController {
     private final FilmRepository filmRepository;
 
     @GetMapping //получение всех фильмов
-    private Collection<Film> getAllFilms() {
-        return filmRepository.getFilms().values();
+    public Collection<Film> getAllFilms() {
+        return filmRepository.getFilmsList();
     }
 
     @PostMapping //добавление фильма
-    private Film createFilm(@RequestBody Film film) {
+    public Film createFilm(@RequestBody Film film) {
         validationService.validateFilm(film);
         filmRepository.createFilm(film);
         log.info("createFilm: film \"{}\" with id {} was created.", film.getName(), film.getId());
@@ -31,7 +31,7 @@ public class FilmController {
     }
 
     @PutMapping //обновление фильма
-    private Film updateFilm(@RequestBody Film film) {
+    public Film updateFilm(@RequestBody Film film) {
         validationService.validateFilm(film);
         filmRepository.updateFilm(film);
         log.info("updateFilm: film \"{}\" with id {} was updated.", film.getName(), film.getId());

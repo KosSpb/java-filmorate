@@ -1,19 +1,21 @@
 package ru.yandex.practicum.filmorate.repository;
 
-import lombok.Getter;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
+import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.User;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
 @Component
-@Getter
+@Slf4j
 public class UserRepository {
     private int generatedId;
     private final Map<Integer, User> users = new HashMap<>();
 
-    public int generateId() {
+    private int generateId() {
         return ++generatedId;
     }
 
@@ -23,6 +25,14 @@ public class UserRepository {
     }
 
     public void updateUser(User user) {
+        if (!users.containsKey(user.getId())) {
+            log.info("updateUser - user id not found: {}", user);
+            throw new ValidationException("Пользователя с данным id не существует.");
+        }
         users.put(user.getId(), user);
+    }
+
+    public Collection<User> getUsersList() {
+        return users.values();
     }
 }

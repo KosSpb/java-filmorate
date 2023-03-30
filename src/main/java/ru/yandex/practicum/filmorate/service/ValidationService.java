@@ -1,28 +1,17 @@
 package ru.yandex.practicum.filmorate.service;
 
-import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.User;
-import ru.yandex.practicum.filmorate.repository.FilmRepository;
-import ru.yandex.practicum.filmorate.repository.UserRepository;
 
 import java.time.LocalDate;
 
 @Component
 @Slf4j
-@AllArgsConstructor
 public class ValidationService {
-    private final UserRepository userRepository;
-    private final FilmRepository filmRepository;
-
     public void validateFilm(Film film) {
-        if (film.getId() > 0 && !filmRepository.getFilms().containsKey(film.getId())) {
-            log.info("updateFilm - film id not found: {}", film);
-            throw new ValidationException("Фильма с данным id не существует.");
-        }
         if (film.getName().isBlank()) {
             log.info("film name is blank: {}", film);
             throw new ValidationException("Название фильма не может быть пустым.");
@@ -41,10 +30,6 @@ public class ValidationService {
     }
 
     public void validateUser(User user) {
-        if (user.getId() > 0 && !userRepository.getUsers().containsKey(user.getId())) {
-            log.info("updateUser - user id not found: {}", user);
-            throw new ValidationException("Пользователя с данным id не существует.");
-        }
         if (user.getEmail().isBlank()) {
             log.info("user e-mail is blank: {}", user);
             throw new ValidationException("Электронная почта не может быть пустой.");

@@ -5,8 +5,6 @@ import org.junit.jupiter.api.Test;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.User;
-import ru.yandex.practicum.filmorate.repository.FilmRepository;
-import ru.yandex.practicum.filmorate.repository.UserRepository;
 
 import java.time.LocalDate;
 
@@ -20,19 +18,11 @@ class ValidationServiceTest {
 
     @BeforeEach
     void beforeEach() {
-        validationService = new ValidationService(new UserRepository(), new FilmRepository());
+        validationService = new ValidationService();
         film = new Film(0, "filmName", "filmDescription",
                 LocalDate.of(1999, 12, 31), 1);
         user = new User(0, "user@ya.ru", "userLogin", "userName",
                 LocalDate.of(1999, 1, 1));
-    }
-
-    @Test
-    void updateFilmTestWithIncorrectId() {
-        film.setId(999);
-
-        assertEquals(999, film.getId(), "id не совпадают");
-        assertThrows(ValidationException.class, () -> validationService.validateFilm(film));
     }
 
     @Test
@@ -71,14 +61,6 @@ class ValidationServiceTest {
         film.setDuration(-1);
 
         assertThrows(ValidationException.class, () -> validationService.validateFilm(film));
-    }
-
-    @Test
-    void validateUserTestWithIncorrectId() {
-        user.setId(999);
-
-        assertEquals(999, user.getId(), "id не совпадают");
-        assertThrows(ValidationException.class, () -> validationService.validateUser(user));
     }
 
     @Test

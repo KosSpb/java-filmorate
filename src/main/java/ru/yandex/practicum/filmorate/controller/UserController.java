@@ -18,12 +18,12 @@ public class UserController {
     private final UserRepository userRepository;
 
     @GetMapping //получение списка всех пользователей
-    private Collection<User> getAllUsers() {
-        return userRepository.getUsers().values();
+    public Collection<User> getAllUsers() {
+        return userRepository.getUsersList();
     }
 
     @PostMapping //создание пользователя
-    private User createUser(@RequestBody User user) {
+    public User createUser(@RequestBody User user) {
         validationService.validateUser(user);
         userRepository.createUser(user);
         log.info("createUser: user \"{}\" with id {} was created.", user.getLogin(), user.getId());
@@ -31,7 +31,7 @@ public class UserController {
     }
 
     @PutMapping //обновление пользователя
-    private User updateUser(@RequestBody User user) {
+    public User updateUser(@RequestBody User user) {
         validationService.validateUser(user);
         userRepository.updateUser(user);
         log.info("updateUser: user \"{}\" with id {} was updated.", user.getLogin(), user.getId());
