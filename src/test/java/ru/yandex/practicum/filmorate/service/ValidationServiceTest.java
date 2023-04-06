@@ -105,4 +105,12 @@ class ValidationServiceTest {
 
         assertEquals(user.getLogin(), user.getName(), "Имя не совпадает с логином.");
     }
+
+    @Test
+    void validateUserTestWithBlankName() {
+        user.setName("");
+        validationService.validateUser(user);
+
+        assertEquals(user.getLogin(), user.getName(), "Имя не совпадает с логином.");
+    }
 }
