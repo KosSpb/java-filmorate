@@ -23,25 +23,23 @@ public class UserService {
 
     public void createUser(User user) {
         userStorage.createUser(user);
-        log.info("createUser: user \"{}\" with id {} was created.", user.getLogin(), user.getId());
     }
 
     public void updateUser(User user) {
         userStorage.updateUser(user);
-        log.info("updateUser: user \"{}\" with id {} was updated.", user.getLogin(), user.getId());
     }
 
     public Collection<User> getUsersList() {
         return userStorage.getUsersList();
     }
 
-    public User getUserById(int id) {
+    public User getUserById(long id) {
        return userStorage.getUserById(id);
     }
 
-    public User addFriend(int id, int friendId) {
+    public User addFriend(long id, long friendId) {
         User user = userStorage.getUserById(id);
-        if (!userStorage.getUsersList().contains(userStorage.getUserById(friendId))) {
+        if (!userStorage.getUsersIds().contains(friendId)) {
             log.info("addFriend - friend id not found: {}", friendId);
             throw new NotFoundException("Друга с данным id не существует.");
         }
@@ -56,9 +54,9 @@ public class UserService {
         return user;
     }
 
-    public User removeFriend(int id, int friendId) {
+    public User removeFriend(long id, long friendId) {
         User user = userStorage.getUserById(id);
-        if (!userStorage.getUsersList().contains(userStorage.getUserById(friendId))) {
+        if (!userStorage.getUsersIds().contains(friendId)) {
             log.info("removeFriend - friend id not found: {}", friendId);
             throw new NotFoundException("Друга с данным id не существует.");
         }
@@ -73,14 +71,14 @@ public class UserService {
         return user;
     }
 
-    public Collection<User> getFriendsList(int id) {
+    public Collection<User> getFriendsList(long id) {
         User user = userStorage.getUserById(id);
         return user.getFriends().stream()
                 .map(this::getUserById)
                 .collect(Collectors.toList());
     }
 
-    public Collection<User> getMutualFriends(int id, int otherId) {
+    public Collection<User> getMutualFriends(long id, long otherId) {
         User user = userStorage.getUserById(id);
         User otherUser = userStorage.getUserById(otherId);
         return user.getFriends().stream()

@@ -27,25 +27,23 @@ public class FilmService {
 
     public void createFilm(Film film) {
         filmStorage.createFilm(film);
-        log.info("createFilm: film \"{}\" with id {} was created.", film.getName(), film.getId());
     }
 
     public void updateFilm(Film film) {
         filmStorage.updateFilm(film);
-        log.info("updateFilm: film \"{}\" with id {} was updated.", film.getName(), film.getId());
     }
 
     public Collection<Film> getFilmsList() {
         return filmStorage.getFilmsList();
     }
 
-    public Film getFilmById(int id) {
+    public Film getFilmById(long id) {
         return filmStorage.getFilmById(id);
     }
 
-    public Film addLikeToFilm(int id, int userId) {
+    public Film addLikeToFilm(long id, long userId) {
         Film film = filmStorage.getFilmById(id);
-        if (!userStorage.getUsersList().contains(userStorage.getUserById(userId))) {
+        if (!userStorage.getUsersIds().contains(userId)) {
             log.info("addLikeToFilm - user id not found: {}", userId);
             throw new NotFoundException("Пользователя с данным id не существует.");
         }
@@ -59,9 +57,9 @@ public class FilmService {
         return film;
     }
 
-    public Film removeLikeOfFilm(int id, int userId) {
+    public Film removeLikeOfFilm(long id, long userId) {
         Film film = filmStorage.getFilmById(id);
-        if (!userStorage.getUsersList().contains(userStorage.getUserById(userId))) {
+        if (!userStorage.getUsersIds().contains(userId)) {
             log.info("removeLikeOfFilm - user id not found: {}", userId);
             throw new NotFoundException("Пользователя с данным id не существует.");
         }
@@ -75,7 +73,7 @@ public class FilmService {
         return film;
     }
 
-    public Collection<Film> getTopFilmsList(int count) {
+    public Collection<Film> getTopFilmsList(long count) {
         return filmStorage.getFilmsList().stream()
                 .sorted(Comparator.comparingInt((Film film) -> film.getLikes().size()).reversed())
                 .limit(count)
