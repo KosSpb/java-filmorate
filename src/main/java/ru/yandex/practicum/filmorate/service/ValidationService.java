@@ -47,7 +47,7 @@ public class ValidationService {
             log.info("user birthday is in future: {}", user);
             throw new ValidationException("Дата рождения не может быть в будущем. Исправьте её и сделайте " +
                     "новый запрос.");
-        } else if (user.getName() == null) {
+        } else if (user.getName() == null || user.getName().isBlank()) {
             user.setName(user.getLogin());
             log.info("user login set as user name: {}", user);
         }
