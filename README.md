@@ -13,7 +13,7 @@ film:
 - description - описание фильма;
 - release_date - дата релиза;
 - duration - продолжительность фильма;
-- mpa_rating_id - рейтинг фильма по Motion Picture Association;
+- mpa_rating_id - идентификатор рейтинга фильма по Motion Picture Association;
 _______________________________________________________________
 film_genre:
 Связующая таблица для фильмов и жанров.
@@ -48,7 +48,7 @@ mpa_rating:
 Содержит перечень рейтингов Motion Picture Association.
 
 Таблица включает поля:
-- первичный ключ mpa_rating_id - рейтинг фильма по Motion Picture Association;
+- первичный ключ mpa_rating_id - идентификатор рейтинга фильма по Motion Picture Association;
 - value - значение рейтинга;
 _______________________________________________________________
 user:
