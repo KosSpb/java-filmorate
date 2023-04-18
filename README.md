@@ -65,93 +65,93 @@ _______________________________________________________________
 
 - получение списка всех фильмов:
 
-  SELECT f.film_id, 
-         f.film_name,
-         f.description,
-         f.release_date,
-         f.duration,
-         mr.value
-  FROM film AS f
-  INNER JOIN mpa_rating AS mr ON f.mpa_rating_id = mr.mpa_rating_id;
+&emsp; SELECT f.film_id,
+&emsp;        f.film_name,
+&emsp;        f.description,
+&emsp;        f.release_date,
+&emsp;        f.duration,
+&emsp;        mr.value
+&emsp; FROM film AS f
+&emsp; INNER JOIN mpa_rating AS mr ON f.mpa_rating_id = mr.mpa_rating_id;
 
 - получение списка всех жанров всех фильмов:
 
-  SELECT f.film_id,
-         f.film_name,
-         g.genre_name
-  FROM film_genre AS fg
-  INNER JOIN genre AS g ON fg.genre_id = g.genre_id
-  INNER JOIN film AS f ON fg.film_id = f.film_id;
+&emsp;  SELECT f.film_id,
+&emsp;         f.film_name,
+&emsp;         g.genre_name
+&emsp;  FROM film_genre AS fg
+&emsp;  INNER JOIN genre AS g ON fg.genre_id = g.genre_id
+&emsp;  INNER JOIN film AS f ON fg.film_id = f.film_id;
 
 - получение фильма по идентификатору:
 
-  SELECT f.film_id,
-         f.film_name,
-         f.description,
-         f.release_date,
-         f.duration,
-         mr.value
-  FROM film AS f
-  INNER JOIN mpa_rating AS mr ON f.mpa_rating_id = mr.mpa_rating_id
-  WHERE film_id = 1;
+&emsp;   SELECT f.film_id,
+&emsp;          f.film_name,
+&emsp;          f.description,
+&emsp;          f.release_date,
+&emsp;          f.duration,
+&emsp;          mr.value
+&emsp;   FROM film AS f
+&emsp;   INNER JOIN mpa_rating AS mr ON f.mpa_rating_id = mr.mpa_rating_id
+&emsp;   WHERE film_id = 1;
 
 - получение списка из первых n фильмов по количеству лайков:
 
-  SELECT f.film_name,
-         f.description,
-         f.release_date,
-         f.duration,
-         mr.value
-  FROM
-      (SELECT film_id,
-              COUNT(user_id) AS total_likes
-         FROM likes
-       GROUP BY film_id
-       ORDER BY total_likes DESC) AS l
-  LEFT OUTER JOIN film AS f ON l.film_id = f.film_id
-  LEFT OUTER JOIN mpa_rating AS mr ON f.mpa_rating_id = mr.mpa_rating_id
-  LIMIT n;
+&emsp;   SELECT f.film_name,
+&emsp;          f.description,
+&emsp;          f.release_date,
+&emsp;          f.duration,
+&emsp;          mr.value
+&emsp;   FROM
+&emsp;       (SELECT film_id,
+&emsp;               COUNT(user_id) AS total_likes
+&emsp;          FROM likes
+&emsp;        GROUP BY film_id
+&emsp;        ORDER BY total_likes DESC) AS l
+&emsp;   LEFT OUTER JOIN film AS f ON l.film_id = f.film_id
+&emsp;   LEFT OUTER JOIN mpa_rating AS mr ON f.mpa_rating_id = mr.mpa_rating_id
+&emsp;   LIMIT n;
 
 - получение списка всех пользователей:
 
-  SELECT *
-  FROM user;
+&emsp;   SELECT *
+&emsp;   FROM user;
 
 - получение пользователя по идентификатору:
 
-  SELECT *
-  FROM user
-  WHERE user_id = 1;
+&emsp;   SELECT *
+&emsp;   FROM user
+&emsp;   WHERE user_id = 1;
 
 - получение списка друзей:
 
-  SELECT u.user_id,
-         u.email,
-         u.login,
-         u.user_name,
-         u.birthday
-  FROM
-     (SELECT acceptor_id
-        FROM friendship
-       WHERE inviter_id = 1
-         AND confirmation_status = 1) AS fr
-  INNER JOIN user AS u ON fr.acceptor_id = u.user_id;
+&emsp;   SELECT u.user_id,
+&emsp;          u.email,
+&emsp;          u.login,
+&emsp;          u.user_name,
+&emsp;          u.birthday
+&emsp;   FROM
+&emsp;      (SELECT acceptor_id
+&emsp;         FROM friendship
+&emsp;        WHERE inviter_id = 1
+&emsp;          AND confirmation_status = 1) AS fr
+&emsp;   INNER JOIN user AS u ON fr.acceptor_id = u.user_id;
 
 - получение списка друзей, общих с другим пользователем:
 
-  SELECT u.user_id,
-         u.email,
-         u.login,
-         u.user_name,
-         u.birthday
-  FROM
-     (SELECT acceptor_id
-        FROM friendship
-       WHERE inviter_id = 1
-         AND confirmation_status = 1) AS fr
-  INNER JOIN
-     (SELECT acceptor_id
-        FROM friendship
-       WHERE inviter_id = 2
-         AND confirmation_status = 1) AS other_fr ON fr.acceptor_id = other_fr.acceptor_id
-  INNER JOIN user AS u ON other_fr.acceptor_id = u.user_id;
+&emsp;   SELECT u.user_id,
+&emsp;          u.email,
+&emsp;          u.login,
+&emsp;          u.user_name,
+&emsp;          u.birthday
+&emsp;   FROM
+&emsp;      (SELECT acceptor_id
+&emsp;         FROM friendship
+&emsp;        WHERE inviter_id = 1
+&emsp;          AND confirmation_status = 1) AS fr
+&emsp;   INNER JOIN
+&emsp;      (SELECT acceptor_id
+&emsp;         FROM friendship
+&emsp;        WHERE inviter_id = 2
+&emsp;          AND confirmation_status = 1) AS other_fr ON fr.acceptor_id = other_fr.acceptor_id
+&emsp;   INNER JOIN user AS u ON other_fr.acceptor_id = u.user_id;
