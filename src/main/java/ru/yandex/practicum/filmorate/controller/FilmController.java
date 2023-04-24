@@ -38,9 +38,9 @@ public class FilmController {
     @PutMapping //обновление фильма
     public Film updateFilm(@RequestBody Film film) {
         validationService.validateFilm(film);
-        filmService.updateFilm(film);
+        Film updatedFilm = filmService.updateFilm(film);
         log.info("updateFilm: film \"{}\" with id {} was updated.", film.getName(), film.getId());
-        return film;
+        return updatedFilm;
     }
 
     @GetMapping("/{id}") //получение фильма по идентификатору

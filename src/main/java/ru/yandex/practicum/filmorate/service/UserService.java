@@ -3,13 +3,11 @@ package ru.yandex.practicum.filmorate.service;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import ru.yandex.practicum.filmorate.exception.AlreadyExistException;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.UserStorage;
 
 import java.util.Collection;
-import java.util.stream.Collectors;
 
 @Service
 @Slf4j
@@ -26,7 +24,10 @@ public class UserService {
     }
 
     public void updateUser(User user) {
-        userStorage.updateUser(user);
+        if (userStorage.updateUser(user) == 0) {
+            log.info("updateUser - user id not found: {}", user);
+            throw new NotFoundException("Пользователя с данным id не существует.");
+        }
     }
 
     public Collection<User> getUsersList() {
@@ -34,56 +35,11 @@ public class UserService {
     }
 
     public User getUserById(long id) {
-       return userStorage.getUserById(id);
-    }
-
-    public User addFriend(long id, long friendId) {
-        User user = userStorage.getUserById(id);
-        if (!userStorage.getUsersIds().contains(friendId)) {
-            log.info("addFriend - friend id not found: {}", friendId);
-            throw new NotFoundException("Друга с данным id не существует.");
-        }
-
-        if (user.getFriends().add(friendId)) {
-            userStorage.getUserById(friendId).getFriends().add(id);
-            log.info("addFriend: user with id {} added friend with id {}.", id, friendId);
+        if (userStorage.getUserById(id).isPresent()) {
+            return userStorage.getUserById(id).get();
         } else {
-            log.info("addFriend - friend id already exists: {}", friendId);
-            throw new AlreadyExistException("Друг с данным id уже добавлен.");
+            log.info("getUserById - user id not found: {}", id);
+            throw new NotFoundException("Пользователя с данным id не существует.");
         }
-        return user;
-    }
-
-    public User removeFriend(long id, long friendId) {
-        User user = userStorage.getUserById(id);
-        if (!userStorage.getUsersIds().contains(friendId)) {
-            log.info("removeFriend - friend id not found: {}", friendId);
-            throw new NotFoundException("Друга с данным id не существует.");
-        }
-
-        if (user.getFriends().remove(friendId)) {
-            userStorage.getUserById(friendId).getFriends().remove(id);
-            log.info("removeFriend: user with id {} removed friend with id {}.", id, friendId);
-        } else {
-            log.info("removeFriend - friend id was already removed: {}", friendId);
-            throw new NotFoundException("Друг с данным id отсутствует в списке друзей.");
-        }
-        return user;
-    }
-
-    public Collection<User> getFriendsList(long id) {
-        User user = userStorage.getUserById(id);
-        return user.getFriends().stream()
-                .map(this::getUserById)
-                .collect(Collectors.toList());
-    }
-
-    public Collection<User> getMutualFriends(long id, long otherId) {
-        User user = userStorage.getUserById(id);
-        User otherUser = userStorage.getUserById(otherId);
-        return user.getFriends().stream()
-                .filter(otherUser.getFriends()::contains)
-                .map(this::getUserById)
-                .collect(Collectors.toList());
     }
 }
