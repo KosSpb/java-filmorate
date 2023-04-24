@@ -49,7 +49,7 @@ class FilmorateApplicationTests {
     }
 
     @Test
-    void UpdateFilmTest() {
+    void updateFilmTest() {
         Film filmForUpdate = filmStorage.getFilmById(1).get();
         filmForUpdate.setName("UpdatedFilm");
         filmForUpdate.setDescription("UpdatedDescription");
@@ -67,7 +67,7 @@ class FilmorateApplicationTests {
     }
 
     @Test
-    void GetFilmsListTest() {
+    void getFilmsListTest() {
         Collection<Film> films = filmStorage.getFilmsList();
 
         assertThat(films).size()
@@ -75,7 +75,7 @@ class FilmorateApplicationTests {
     }
 
     @Test
-    void GetFilmByIdTest() {
+    void getFilmByIdTest() {
         Optional<Film> filmOptional = filmStorage.getFilmById(1);
 
         assertThat(filmOptional)
@@ -89,7 +89,7 @@ class FilmorateApplicationTests {
     }
 
     @Test
-    void GetTopFilmsListTest() {
+    void getTopFilmsListTest() {
         Film film = filmStorage.getFilmById(1).get();
         User user = userStorage.getUserById(1).get();
         likesStorage.addLikeToFilm(film.getId(), user.getId());
