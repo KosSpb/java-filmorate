@@ -2,9 +2,11 @@ package ru.yandex.practicum.filmorate.storage.impl;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
+import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.stereotype.Repository;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
@@ -15,9 +17,7 @@ import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.Collection;
-import java.util.LinkedHashSet;
-import java.util.Optional;
+import java.util.*;
 
 @Repository
 public class FilmDbStorage implements FilmStorage {
@@ -47,16 +47,9 @@ public class FilmDbStorage implements FilmStorage {
             return stmt;
         }, keyHolder);
 
-        long filmId = keyHolder.getKey().longValue();
-        film.setId(filmId);
+        film.setId(keyHolder.getKey().longValue());
 
-        if (film.getGenres().size() > 0) {
-            String sqlQueryInsGenres = "insert into film_genre(film_id, genre_id) " +
-                    "values (?, ?)";
-            for (Genre genre : film.getGenres()) {
-                jdbcTemplate.update(sqlQueryInsGenres, filmId, genre.getId());
-            }
-        }
+        addGenresToDb(film);
     }
 
     @Override
@@ -68,13 +61,7 @@ public class FilmDbStorage implements FilmStorage {
                 "where film_id = ?";
         jdbcTemplate.update(sqlQueryDelGenres, film.getId());
 
-        if (film.getGenres().size() > 0) {
-            String sqlQueryInsGenres = "insert into film_genre(film_id, genre_id) " +
-                    "values (?, ?)";
-            for (Genre genre : film.getGenres()) {
-                jdbcTemplate.update(sqlQueryInsGenres, film.getId(), genre.getId());
-            }
-        }
+        addGenresToDb(film);
 
         String sqlQuery = "update film set " +
                 "film_name = ?, description = ?, release_date = ?, duration = ?, mpa_rating_id = ? " +
@@ -87,7 +74,7 @@ public class FilmDbStorage implements FilmStorage {
                 film.getMpa().getId(),
                 film.getId());
 
-        return getFilmById(film.getId());
+        return Optional.of(film);
     }
 
     @Override
@@ -95,7 +82,17 @@ public class FilmDbStorage implements FilmStorage {
         String sqlQuery = "select * from film f " +
                 "join " +
                 "mpa_rating mr on f.mpa_rating_id = mr.mpa_rating_id";
-        return jdbcTemplate.query(sqlQuery, this::mapRowToFilm);
+        List<Film> films = jdbcTemplate.query(sqlQuery, this::mapRowToFilm);
+
+        Map<Long, List<Genre>> genres = addGenresToSeveralFilms(films);
+        if (!genres.isEmpty()) {
+            for (Film film : films) {
+                if (genres.get(film.getId()) != null) {
+                    film.setGenres(new LinkedHashSet<>(genres.get(film.getId())));
+                }
+            }
+        }
+        return films;
     }
 
     @Override
@@ -105,7 +102,10 @@ public class FilmDbStorage implements FilmStorage {
                 "mpa_rating mr on f.mpa_rating_id = mr.mpa_rating_id " +
                 "where film_id = ?";
         try {
-            return Optional.ofNullable(jdbcTemplate.queryForObject(sqlQuery, this::mapRowToFilm, id));
+            Film film = jdbcTemplate.queryForObject(sqlQuery, this::mapRowToFilm, id);
+
+            film.setGenres(new LinkedHashSet<>(addGenresToFilm(film.getId())));
+            return Optional.of(film);
         } catch (EmptyResultDataAccessException exception) {
             return Optional.empty();
         }
@@ -121,7 +121,17 @@ public class FilmDbStorage implements FilmStorage {
                 "group by f.film_id " +
                 "order by count(l.user_id) desc " +
                 "limit ?";
-        return jdbcTemplate.query(sqlQuery, this::mapRowToFilm, count);
+        List<Film> films = jdbcTemplate.query(sqlQuery, this::mapRowToFilm, count);
+
+        Map<Long, List<Genre>> genres = addGenresToSeveralFilms(films);
+        if (!genres.isEmpty()) {
+            for (Film film : films) {
+                if (genres.get(film.getId()) != null) {
+                    film.setGenres(new LinkedHashSet<>(genres.get(film.getId())));
+                }
+            }
+        }
+        return films;
     }
 
     private Film mapRowToFilm(ResultSet resultSet, int rowNum) throws SQLException {
@@ -133,15 +143,71 @@ public class FilmDbStorage implements FilmStorage {
                 .duration(resultSet.getInt("duration"))
                 .mpa(new MpaRating(resultSet.getInt("mpa_rating_id"),
                         resultSet.getString("mpa_value")))
-                .genres(new LinkedHashSet<>(genresOfFilm(resultSet.getLong("film_id"))))
+                .genres(new LinkedHashSet<>())
                 .build();
     }
 
-    private Collection<Genre> genresOfFilm(long id) {
+    private Collection<Genre> addGenresToFilm(long id) {
         String sqlQuery = "select * from genre " +
                 "where genre_id in " +
                 "(select genre_id from film_genre " +
                 "where film_id = ?)";
         return jdbcTemplate.query(sqlQuery, genreDbStorage::mapRowToGenre, id);
+    }
+
+    private Map<Long, List<Genre>> addGenresToSeveralFilms(List<Film> films) {
+        if (films.isEmpty()) {
+            return new HashMap<>();
+        }
+        StringBuilder queryBuilder = new StringBuilder();
+        for (Film film : films) {
+            queryBuilder.append(film.getId());
+            queryBuilder.append(",");
+        }
+        queryBuilder.deleteCharAt(queryBuilder.length() - 1);
+        String sqlQuery = "select * from film_genre fg " +
+                "join " +
+                "genre g on fg.genre_id = g.genre_id " +
+                "where film_id in " +
+                "(" + queryBuilder + ")";
+
+        SqlRowSet filmsIdsAndGenresRows = jdbcTemplate.queryForRowSet(sqlQuery);
+        Map<Long, List<Genre>> genresOfFilms = new HashMap<>();
+
+        while (filmsIdsAndGenresRows.next()) {
+            long id = filmsIdsAndGenresRows.getLong("film_id");
+            Genre genre = new Genre(filmsIdsAndGenresRows.getInt("genre_id"),
+                    filmsIdsAndGenresRows.getString("genre_name"));
+
+            List<Genre> genresOfEachFilm;
+            if (genresOfFilms.containsKey(id)) {
+                genresOfEachFilm = genresOfFilms.get(id);
+            } else {
+                genresOfEachFilm = new ArrayList<>();
+                genresOfFilms.put(id, genresOfEachFilm);
+            }
+            genresOfEachFilm.add(genre);
+        }
+        return genresOfFilms;
+    }
+
+    private void addGenresToDb(Film film) {
+        if (film.getGenres().size() > 0) {
+            String sqlQueryInsGenres = "insert into film_genre(film_id, genre_id) " +
+                    "values (?, ?)";
+            List<Genre> genres = new ArrayList<>(film.getGenres());
+
+            jdbcTemplate.batchUpdate(sqlQueryInsGenres,
+                    new BatchPreparedStatementSetter() {
+                        public void setValues(PreparedStatement ps, int i) throws SQLException {
+                            ps.setLong(1, film.getId());
+                            ps.setLong(2, genres.get(i).getId());
+                        }
+
+                        public int getBatchSize() {
+                            return genres.size();
+                        }
+                    });
+        }
     }
 }

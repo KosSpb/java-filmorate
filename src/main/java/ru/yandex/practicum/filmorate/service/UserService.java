@@ -35,11 +35,9 @@ public class UserService {
     }
 
     public User getUserById(long id) {
-        if (userStorage.getUserById(id).isPresent()) {
-            return userStorage.getUserById(id).get();
-        } else {
+        return userStorage.getUserById(id).orElseThrow(() -> {
             log.info("getUserById - user id not found: {}", id);
             throw new NotFoundException("Пользователя с данным id не существует.");
-        }
+        });
     }
 }

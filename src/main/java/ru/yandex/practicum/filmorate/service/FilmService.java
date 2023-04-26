@@ -11,7 +11,6 @@ import ru.yandex.practicum.filmorate.storage.LikesStorage;
 import ru.yandex.practicum.filmorate.storage.UserStorage;
 
 import java.util.Collection;
-import java.util.LinkedHashSet;
 
 @Service
 @Slf4j
@@ -28,23 +27,14 @@ public class FilmService {
     }
 
     public void createFilm(Film film) {
-        if (film.getGenres() == null) {
-            film.setGenres(new LinkedHashSet<>());
-        }
         filmStorage.createFilm(film);
     }
 
     public Film updateFilm(Film film) {
-        if (film.getGenres() == null) {
-            film.setGenres(new LinkedHashSet<>());
-        }
-
-        if (filmStorage.updateFilm(film).isEmpty()) {
+        return filmStorage.updateFilm(film).orElseThrow(() -> {
             log.info("updateFilm - film id not found: {}", film);
             throw new NotFoundException("Фильма с данным id не существует.");
-        } else {
-            return filmStorage.updateFilm(film).get();
-        }
+        });
     }
 
     public Collection<Film> getFilmsList() {
@@ -52,19 +42,18 @@ public class FilmService {
     }
 
     public Film getFilmById(long id) {
-        if (filmStorage.getFilmById(id).isPresent()) {
-            return filmStorage.getFilmById(id).get();
-        } else {
+        return filmStorage.getFilmById(id).orElseThrow(() -> {
             log.info("getFilmById - film id not found: {}", id);
             throw new NotFoundException("Фильма с данным id не существует.");
-        }
+        });
     }
 
     public Film addLikeToFilm(long id, long userId) {
-        if (filmStorage.getFilmById(id).isEmpty()) {
+        Film film = filmStorage.getFilmById(id).orElseThrow(() -> {
             log.info("addLikeToFilm - film id not found: {}", id);
             throw new NotFoundException("Фильма с данным id не существует.");
-        }
+        });
+
         if (userStorage.getUserById(userId).isEmpty()) {
             log.info("addLikeToFilm - user id not found: {}", userId);
             throw new NotFoundException("Пользователя с данным id не существует.");
@@ -77,14 +66,15 @@ public class FilmService {
             throw new AlreadyExistException("Вы уже ставили лайк фильму c данным id");
         }
 
-        return filmStorage.getFilmById(id).get();
+        return film;
     }
 
     public Film removeLikeOfFilm(long id, long userId) {
-        if (filmStorage.getFilmById(id).isEmpty()) {
+        Film film = filmStorage.getFilmById(id).orElseThrow(() -> {
             log.info("removeLikeOfFilm - film id not found: {}", id);
             throw new NotFoundException("Фильма с данным id не существует.");
-        }
+        });
+
         if (userStorage.getUserById(userId).isEmpty()) {
             log.info("removeLikeOfFilm - user id not found: {}", userId);
             throw new NotFoundException("Пользователя с данным id не существует.");
@@ -97,7 +87,7 @@ public class FilmService {
             throw new NotFoundException("Вы уже удалили лайк у фильма c данным id.");
         }
 
-        return filmStorage.getFilmById(id).get();
+        return film;
     }
 
     public Collection<Film> getTopFilmsList(long count) {

@@ -24,11 +24,9 @@ public class MpaRatingService {
     }
 
     public MpaRating getMpaRatingById(int id) {
-        if (mpaRatingStorage.getMpaRatingById(id).isPresent()) {
-            return mpaRatingStorage.getMpaRatingById(id).get();
-        } else {
+        return mpaRatingStorage.getMpaRatingById(id).orElseThrow(() -> {
             log.info("getMpaRatingById - mpa rating id not found: {}", id);
             throw new NotFoundException("Рейтинга MPA с данным id не существует.");
-        }
+        });
     }
 }

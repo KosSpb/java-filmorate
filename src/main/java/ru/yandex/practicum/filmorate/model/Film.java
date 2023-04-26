@@ -1,15 +1,13 @@
 package ru.yandex.practicum.filmorate.model;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NonNull;
+import lombok.*;
 
 import java.time.LocalDate;
-import java.util.Set;
+import java.util.LinkedHashSet;
 
 @Data
 @AllArgsConstructor
+@NoArgsConstructor
 @Builder
 public class Film {
     private long id;
@@ -22,5 +20,5 @@ public class Film {
     private int duration;
     @NonNull
     private MpaRating mpa;
-    private Set<Genre> genres;
+    private LinkedHashSet<Genre> genres = new LinkedHashSet<>();
 }

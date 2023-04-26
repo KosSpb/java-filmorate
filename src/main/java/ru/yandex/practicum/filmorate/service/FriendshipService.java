@@ -24,10 +24,11 @@ public class FriendshipService {
     }
 
     public User addFriend(long id, long friendId) {
-        if (userStorage.getUserById(id).isEmpty()) {
+        User user = userStorage.getUserById(id).orElseThrow(() -> {
             log.info("addFriend - user id not found: {}", id);
             throw new NotFoundException("Пользователя с данным id не существует.");
-        }
+        });
+
         if (userStorage.getUserById(friendId).isEmpty()) {
             log.info("addFriend - friend id not found: {}", friendId);
             throw new NotFoundException("Друга с данным id не существует.");
@@ -40,14 +41,15 @@ public class FriendshipService {
             throw new AlreadyExistException("Друг с данным id уже добавлен.");
         }
 
-        return userStorage.getUserById(id).get();
+        return user;
     }
 
     public User acceptFriendship(long id, long friendId) {
-        if (userStorage.getUserById(id).isEmpty()) {
+        User user = userStorage.getUserById(id).orElseThrow(() -> {
             log.info("acceptFriendship - user id not found: {}", id);
             throw new NotFoundException("Пользователя с данным id не существует.");
-        }
+        });
+
         if (userStorage.getUserById(friendId).isEmpty()) {
             log.info("acceptFriendship - friend id not found: {}", friendId);
             throw new NotFoundException("Друга с данным id не существует.");
@@ -60,14 +62,15 @@ public class FriendshipService {
             throw new AlreadyExistException("Данные пользователи не являются друзьями.");
         }
 
-        return userStorage.getUserById(id).get();
+        return user;
     }
 
     public User removeFriend(long id, long friendId) {
-        if (userStorage.getUserById(id).isEmpty()) {
+        User user = userStorage.getUserById(id).orElseThrow(() -> {
             log.info("removeFriend - user id not found: {}", id);
             throw new NotFoundException("Пользователя с данным id не существует.");
-        }
+        });
+
         if (userStorage.getUserById(friendId).isEmpty()) {
             log.info("removeFriend - friend id not found: {}", friendId);
             throw new NotFoundException("Друга с данным id не существует.");
@@ -80,7 +83,7 @@ public class FriendshipService {
             throw new NotFoundException("Друг с данным id отсутствует в списке друзей.");
         }
 
-        return userStorage.getUserById(id).get();
+        return user;
     }
 
     public Collection<User> getFriendsList(long id) {
