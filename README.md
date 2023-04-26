@@ -65,93 +65,48 @@ _______________________________________________________________
 
 - получение списка всех фильмов:
 
-&emsp; SELECT f.film_id,<br/>
-&emsp;        f.film_name,<br/>
-&emsp;        f.description,<br/>
-&emsp;        f.release_date,<br/>
-&emsp;        f.duration,<br/>
-&emsp;        mr.value<br/>
+&emsp; SELECT *<br/>
 &emsp; FROM film AS f<br/>
 &emsp; INNER JOIN mpa_rating AS mr ON f.mpa_rating_id = mr.mpa_rating_id;<br/>
 
-- получение списка всех жанров всех фильмов:
+- получение списка всех жанров:
 
-&emsp;  SELECT f.film_id,<br/>
-&emsp;         f.film_name,<br/>
-&emsp;         g.genre_name<br/>
-&emsp;  FROM film_genre AS fg<br/>
-&emsp;  INNER JOIN genre AS g ON fg.genre_id = g.genre_id<br/>
-&emsp;  INNER JOIN film AS f ON fg.film_id = f.film_id;<br/>
+&emsp;  SELECT *<br/>
+&emsp;  FROM genre<br/>
 
 - получение фильма по идентификатору:
 
-&emsp;   SELECT f.film_id,<br/>
-&emsp;          f.film_name,<br/>
-&emsp;          f.description,<br/>
-&emsp;          f.release_date,<br/>
-&emsp;          f.duration,<br/>
-&emsp;          mr.value<br/>
+&emsp;   SELECT *<br/>
 &emsp;   FROM film AS f<br/>
 &emsp;   INNER JOIN mpa_rating AS mr ON f.mpa_rating_id = mr.mpa_rating_id<br/>
 &emsp;   WHERE film_id = 1;<br/>
 
 - получение списка из первых n фильмов по количеству лайков:
 
-&emsp;   SELECT f.film_name,<br/>
-&emsp;          f.description,<br/>
-&emsp;          f.release_date,<br/>
-&emsp;          f.duration,<br/>
-&emsp;          mr.value<br/>
-&emsp;   FROM<br/>
-&emsp;       (SELECT film_id,<br/>
-&emsp;               COUNT(user_id) AS total_likes<br/>
-&emsp;          FROM likes<br/>
-&emsp;        GROUP BY film_id<br/>
-&emsp;        ORDER BY total_likes DESC) AS l<br/>
-&emsp;   LEFT OUTER JOIN film AS f ON l.film_id = f.film_id<br/>
-&emsp;   LEFT OUTER JOIN mpa_rating AS mr ON f.mpa_rating_id = mr.mpa_rating_id<br/>
+&emsp;   SELECT *<br/>
+&emsp;   FROM film AS f<br/>
+&emsp;   INNER JOIN mpa_rating AS mr ON f.mpa_rating_id = mr.mpa_rating_id<br/>
+&emsp;   LEFT OUTER JOIN likes AS l ON f.film_id = l.film_id<br/>
+&emsp;   GROUP BY f.film_id<br/>
+&emsp;   ORDER BY COUNT(l.user_id) DESC<br/>
 &emsp;   LIMIT n;<br/>
 
 - получение списка всех пользователей:
 
 &emsp;   SELECT *<br/>
-&emsp;   FROM user;<br/>
+&emsp;   FROM users;<br/>
 
 - получение пользователя по идентификатору:
 
 &emsp;   SELECT *<br/>
-&emsp;   FROM user<br/>
+&emsp;   FROM users<br/>
 &emsp;   WHERE user_id = 1;<br/>
 
 - получение списка друзей:
 
-&emsp;   SELECT u.user_id,<br/>
-&emsp;          u.email,<br/>
-&emsp;          u.login,<br/>
-&emsp;          u.user_name,<br/>
-&emsp;          u.birthday<br/>
-&emsp;   FROM<br/>
-&emsp;      (SELECT acceptor_id<br/>
-&emsp;         FROM friendship<br/>
-&emsp;        WHERE inviter_id = 1<br/>
-&emsp;          AND confirmation_status = 1) AS fr<br/>
-&emsp;   INNER JOIN user AS u ON fr.acceptor_id = u.user_id;<br/>
-
-- получение списка друзей, общих с другим пользователем:
-
-&emsp;   SELECT u.user_id,<br/>
-&emsp;          u.email,<br/>
-&emsp;          u.login,<br/>
-&emsp;          u.user_name,<br/>
-&emsp;          u.birthday<br/>
-&emsp;   FROM<br/>
-&emsp;      (SELECT acceptor_id<br/>
-&emsp;         FROM friendship<br/>
-&emsp;        WHERE inviter_id = 1<br/>
-&emsp;          AND confirmation_status = 1) AS fr<br/>
-&emsp;   INNER JOIN<br/>
-&emsp;      (SELECT acceptor_id<br/>
-&emsp;         FROM friendship<br/>
-&emsp;        WHERE inviter_id = 2<br/>
-&emsp;          AND confirmation_status = 1) AS other_fr ON fr.acceptor_id = other_fr.acceptor_id<br/>
-&emsp;   INNER JOIN user AS u ON other_fr.acceptor_id = u.user_id;<br/>
+&emsp;   SELECT *<br/>
+&emsp;   FROM users<br/>
+&emsp;   WHERE user_id in<br/>
+&emsp;   (SELECT acceptor_id<br/>
+&emsp;   FROM friendship<br/>
+&emsp;   WHERE inviter_id = 1)<br/>

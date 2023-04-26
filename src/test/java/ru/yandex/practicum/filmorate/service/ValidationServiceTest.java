@@ -4,9 +4,11 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.model.MpaRating;
 import ru.yandex.practicum.filmorate.model.User;
 
 import java.time.LocalDate;
+import java.util.LinkedHashSet;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -20,7 +22,8 @@ class ValidationServiceTest {
     void beforeEach() {
         validationService = new ValidationService();
         film = new Film(0, "filmName", "filmDescription",
-                LocalDate.of(1999, 12, 31), 1);
+                LocalDate.of(1999, 12, 31), 1, new MpaRating(1, "G"),
+                new LinkedHashSet<>());
         user = new User(0, "user@ya.ru", "userLogin", "userName",
                 LocalDate.of(1999, 1, 1));
     }

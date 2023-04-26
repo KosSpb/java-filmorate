@@ -1,15 +1,14 @@
 package ru.yandex.practicum.filmorate.model;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NonNull;
+import lombok.*;
 
 import java.time.LocalDate;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.LinkedHashSet;
 
 @Data
 @AllArgsConstructor
+@NoArgsConstructor
+@Builder
 public class Film {
     private long id;
     @NonNull
@@ -19,5 +18,7 @@ public class Film {
     @NonNull
     private LocalDate releaseDate;
     private int duration;
-    private final Set<Long> likes = new HashSet<>();
+    @NonNull
+    private MpaRating mpa;
+    private LinkedHashSet<Genre> genres = new LinkedHashSet<>();
 }
